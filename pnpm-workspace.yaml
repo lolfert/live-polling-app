@@ -1,0 +1,3 @@
+packages:
+  - 'apps/*'      # Location of individual applications (frontend, backend)
+  - 'packages/*'  # Location of shared packages (e.g., types)
