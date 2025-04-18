@@ -19,14 +19,11 @@ out/
 coverage/
 *.tsbuildinfo
 
-# Next.js (if used later, good to have)
-# .next/
-
 # Vite (for frontend)
 .vite/
 
-# Prisma (if client is generated locally outside node_modules)
-# **/generated/
+# Generated build artifacts
+**/generated/
 
 # OS generated files
 .DS_Store
