@@ -8,17 +8,12 @@ import { handleSocketConnection } from './sockets';
 
 dotenv.config({ path: '../../.env' });
 
-const server_urls = [
-        process.env.FRONTEND_DEVELOPMENT_URL || '',
-        process.env.FRONTEND_PRODUCTION_URL || ''
-];
-
 // HTTP Setup
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 8000;
 
-app.use(cors({ origin: server_urls, methods: ["GET", "POST", "PUT", "DELETE"] }));
+app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
@@ -33,8 +28,9 @@ app.get('/api/health', (req, res) => {
 
 const io = new SocketIOServer(server, {
         cors: {
-                origin: server_urls,
-                methods: ["GET", "POST"]
+                origin: 'http://localhost:3000',
+                methods: ['GET', 'POST'],
+                credentials: true
         }
 });
 
