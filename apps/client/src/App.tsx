@@ -9,7 +9,7 @@ function App() {
       <div className="container mx-auto p-4">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/poll/:pollId" element={<PollPage />} />
+          <Route path="/poll/:shortCode" element={<PollPage />} />
         </Routes>
         <Toaster richColors position="bottom-center" />
       </div>

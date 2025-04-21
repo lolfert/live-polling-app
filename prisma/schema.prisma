@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../node_modules/prisma"
 }
 
 datasource db {
@@ -9,12 +8,13 @@ datasource db {
 }
 
 model Poll {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   question  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  shortCode String    @default(dbgenerated("generate_alphanumeric_id(6)"))
   options   Option[]
   votes     Vote[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Option {
@@ -30,11 +30,11 @@ model Option {
 model Vote {
   id        String   @id @default(cuid())
   optionId  String
-  option    Option   @relation(fields: [optionId], references: [id], onDelete: Cascade)
   pollId    String
-  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
   voterId   String
   createdAt DateTime @default(now())
+  option    Option   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  poll      Poll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
 
   @@unique([pollId, voterId])
   @@index([optionId])

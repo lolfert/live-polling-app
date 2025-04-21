@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Poll" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL DEFAULT (generate_alphanumeric_id(6)),
     "question" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

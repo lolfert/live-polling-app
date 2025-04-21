@@ -12,7 +12,6 @@ function CreatePollForm() {
   const [options, setOptions] = useState<string[]>(['', '']);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  // Removed: const { toast } = useToast();
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -45,7 +44,6 @@ function CreatePollForm() {
     const validOptions = options.map(opt => opt.trim()).filter(opt => opt !== '');
 
     if (!question.trim() || validOptions.length < 2) {
-      // Use sonner toast API
       toast.error("Invalid Input", {
         description: "Please enter a question and at least two valid options.",
       });
@@ -65,12 +63,12 @@ function CreatePollForm() {
         throw new Error(errorData.message || 'Failed to create poll');
       }
 
-      const data: { id: string } = await response.json();
+      const data: { shortCode: string } = await response.json();
       // Use sonner toast API
       toast.success("Poll Created!", {
         description: "Redirecting to your new poll...",
       });
-      navigate(`/poll/${data.id}`);
+      navigate(`/poll/${data.shortCode}`);
 
     } catch (error) {
       console.error("Poll creation failed:", error);

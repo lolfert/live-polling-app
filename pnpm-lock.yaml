@@ -56,9 +56,6 @@ importers:
       react-router-dom:
         specifier: ^7.5.1
         version: 7.5.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      shared-types:
-        specifier: workspace:^
-        version: link:../../packages/shared-types
       socket.io-client:
         specifier: ^4.8.1
         version: 4.8.1
@@ -132,9 +129,6 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
-      shared-types:
-        specifier: workspace:^
-        version: link:../../packages/shared-types
       socket.io:
         specifier: ^4.8.1
         version: 4.8.1
@@ -160,8 +154,6 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.14.1)(typescript@5.8.3)
-
-  packages/shared-types: {}
 
 packages:
 

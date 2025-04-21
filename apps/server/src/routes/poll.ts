@@ -1,6 +1,6 @@
 import express from 'express';
 import { io } from '../index';
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -55,6 +55,7 @@ async function broadcastPollUpdates(pollId: string) {
 
 router.post('/polls', async (req: any, res: any) => {
         // POST /api/polls - Create a new poll
+        console.debug('POST /api/polls', req.body);
 
         const { question, options } = req.body as CreatePollRequestBody;
 
@@ -66,8 +67,6 @@ router.post('/polls', async (req: any, res: any) => {
                 return res.status(400).json({ message: 'At least two valid, non-empty options are required.' });
         }
 
-        let newPollId: string | null = null;
-
         try {
                 const createdPoll = await prisma.poll.create({
                         data: {
@@ -75,11 +74,9 @@ router.post('/polls', async (req: any, res: any) => {
                                 options: {
                                         create: options.map((option) => ({ text: option.trim() })),
                                 },
-                        },
-                        select: { id: true },
+                        }
                 });
-                newPollId = createdPoll.id;
-                res.status(201).json({ id: newPollId });
+                res.status(201).json(createdPoll);
         }
 
         catch (error) {
@@ -93,54 +90,51 @@ router.post('/polls', async (req: any, res: any) => {
 
 });
 
+router.post('/polls/fetch', async (req: any, res: any) => {
 
-router.get('/polls/:pollId', async (req: any, res: any) => {
-        // GET /api/polls/:pollId - Get poll data (including option counts and total voters)
+        const { id, shortCode } = req.body;
 
-        const { pollId } = req.params;
-
-        if (!pollId || typeof pollId !== 'string') {
-                return res.status(400).json({ message: 'Invalid Poll ID provided.' });
+        if (!id && !shortCode) {
+                return res.status(400).json({ message: 'Either id or shortCode must be provided.' });
         }
 
         try {
 
-                const poll = await prisma.poll.findUnique({
-                        where: { id: pollId }
+                const poll = await prisma.poll.findFirst({
+                        where: {
+                                OR: [
+                                        { id },
+                                        { shortCode },
+                                ],
+                        }
                 });
 
                 if (!poll) {
                         return res.status(404).json({ message: 'Poll not found.' });
                 }
 
-                // Get counts separately
-                const optionsWithCounts = await getOptionsWithCounts(pollId);
-                const totalVoters = await prisma.vote.count({ where: { pollId: pollId } });
+                const optionsWithCounts = await getOptionsWithCounts(poll.id);
+                const totalVoters = await prisma.vote.count({ where: { pollId: poll.id } });
 
-                // Combine data for response
                 const responseData = {
                         ...poll,
-                        options: optionsWithCounts, // Replace options with the ones including counts
-                        voterCount: totalVoters, // Add the total voter count
+                        options: optionsWithCounts,
+                        voterCount: totalVoters,
                 };
 
                 res.status(200).json(responseData);
-
-        }
-
-        catch (error) {
-                console.error(`Failed to fetch poll ${pollId}:`, error);
+        } catch (error) {
+                console.error('Failed to fetch poll:', error);
                 res.status(500).json({ message: 'Internal Server Error: Could not fetch poll data.' });
-        }
-
-        finally {
+        } finally {
                 await prisma.$disconnect();
         }
-
 });
 
 router.post('/vote', async (req: any, res: any) => {
         // POST /api/vote - Submit or change a vote (anonymous)
+
+        console.log('POST /api/vote', req.body);
 
         const { optionId, pollId, voterId } = req.body as VoteRequestBody;
 

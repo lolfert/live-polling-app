@@ -12,12 +12,13 @@ interface PollResultsProps {
 }
 
 function PollResults({ options }: PollResultsProps) {
+
         const totalVotes = options.reduce((sum, option) => sum + (option._count?.votes || 0), 0);
 
         return (
                 <div className="space-y-4">
                         {options.length > 0 ? (
-                                options.map((option) => {
+                                options.sort((a, b) => a.text.localeCompare(b.text)).map((option) => {
                                         const voteCount = option._count?.votes || 0;
                                         const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
 
