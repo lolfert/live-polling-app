@@ -4,27 +4,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from "sonner";
-import { DndContext, closestCenter } from '@dnd-kit/core';
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { v4 as uuidv4 } from 'uuid';
+import { InputWithIcon } from './InputWithIcon';
+import { AlignJustify, X } from "lucide-react"
+import { cn } from '@/lib/utils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+const optionParams = {
+  minCount: 2,
+  maxCount: 8,
+  initialValue: [
+    { key: uuidv4(), value: '' },
+    { key: uuidv4(), value: '' },
+  ]
+}
 
 function CreatePollForm() {
 
   const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState<{ key: string, value: string }[]>([]);
+  const [options, setOptions] = useState(optionParams.initialValue);
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setOptions([
-      { key: uuidv4(), value: '' },
-      { key: uuidv4(), value: '' },
-    ]);
-  }, []);
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -33,17 +38,18 @@ function CreatePollForm() {
   };
 
   const addOption = () => {
-    if (options.length < 10) {
+    if (options.length < optionParams.maxCount) {
       setOptions([...options, { key: uuidv4(), value: '' }]);
     } else {
       toast.warning("Limit Reached", {
-        description: "You can add a maximum of 10 options.",
+        description: `You can only add up to ${optionParams.maxCount} options.`,
       });
     }
   };
 
   const removeOption = (index: number) => {
-    if (options.length > 2) {
+    console.log('Removing option at index:', index);
+    if (options.length > optionParams.minCount) {
       const newOptions = options.filter((_, i) => i !== index);
       setOptions(newOptions);
     }
@@ -103,10 +109,18 @@ function CreatePollForm() {
     }
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 4, // Prevents drag event from being triggered on button click
+      },
+    })
+  )
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="question">Poll Question</Label>
+        <Label htmlFor="question">Question</Label>
         <Input
           id="question"
           value={question}
@@ -118,7 +132,7 @@ function CreatePollForm() {
       </div>
 
       <Label>Options</Label>
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext items={options.map(option => option.key)}>
           {options.map((option, index) => (
             <SortableItem
@@ -127,14 +141,15 @@ function CreatePollForm() {
               index={index}
               option={option.value}
               onChange={handleOptionChange}
-              onRemove={removeOption}
+              onRemove={() => removeOption(index)}
+              isRemovable={options.length > optionParams.minCount}
               isLoading={isLoading}
             />
           ))}
         </SortableContext>
       </DndContext>
 
-      <Button type="button" variant="secondary" onClick={addOption} disabled={isLoading || options.length >= 10}>
+      <Button type="button" className="w-full" variant="secondary" onClick={addOption} disabled={isLoading || options.length >= optionParams.maxCount}>
         Add Option
       </Button>
 
@@ -145,7 +160,8 @@ function CreatePollForm() {
   );
 }
 
-function SortableItem({ id, index, option, onChange, onRemove, isLoading }: any) {
+function SortableItem({ id, index, option, onChange, onRemove, isRemovable, isLoading }: any) {
+
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
   const style = {
@@ -154,26 +170,28 @@ function SortableItem({ id, index, option, onChange, onRemove, isLoading }: any)
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="flex items-center space-x-2">
-      <Input
+    <div
+      ref={setNodeRef} style={style} {...attributes} {...listeners}
+    >
+      <InputWithIcon
         type="text"
         value={option}
-        onChange={(e) => onChange(index, e.target.value)}
+        onChange={(e: any) => onChange(index, e.target.value)}
         placeholder={`Option ${index + 1}`}
         required
         disabled={isLoading}
+        startIcon={<AlignJustify className="h-4 w-4 cursor-grab" />}
+        endIcon={
+          <X
+            className={cn(
+              "h-4 w-4 flex items-center justify-center transition-opacity transition-duration-100",
+              isRemovable ? "opacity-100 hover:opacity-75" : "opacity-0"
+            )}
+            onClick={onRemove}
+            aria-label="Remove option"
+          />
+        }
       />
-      {onRemove && (
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          onClick={() => onRemove(index)}
-          disabled={isLoading}
-        >
-          Remove
-        </Button>
-      )}
     </div>
   );
 }
