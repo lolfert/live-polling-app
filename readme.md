@@ -1,10 +1,10 @@
-# Design Document: Live Poll App
+# Live Poll App
 
 ---
 
 ## 1. Introduction
 
-This document outlines the design and requirements for the Live Poll App, a full-stack web application designed for creating and participating in real-time polls. The goal is to enable users, particularly in group settings like presentations or classrooms, to quickly set up multiple-choice polls and gather immediate, visualized feedback from participants. This document reflects the decisions made regarding features, user flow, and technical stack prior to the implementation of the frontend components.
+This document outlines the design and requirements for the Live Poll App, a full-stack web application designed for creating and participating in real-time polls. The goal is to enable users, particularly in group settings like presentations or classrooms, to quickly set up multiple-choice polls and gather immediate, visualized feedback from participants. This document reflects the decisions made regarding features, user flow, and technical stack.
 
 ---
 
@@ -16,7 +16,6 @@ This document outlines the design and requirements for the Live Poll App, a full
 * Provide real-time updates of poll results to all viewers.
 * Display live participant counts and total voter counts.
 * Offer a clean, responsive, and modern user interface (defaulting to dark mode).
-* Serve as a portfolio project demonstrating full-stack development skills.
 
 ---
 
@@ -34,8 +33,7 @@ This document outlines the design and requirements for the Live Poll App, a full
   * Users can define multiple-choice options (text), with the ability to add/remove options (minimum 2, maximum e.g., 10).
   * Upon submission, the backend generates a unique poll ID and saves the poll data.
 * **Poll Sharing & Access:**
-  * After creation, the creator is redirected to a unique URL for the poll (`/poll/:pollId`).
-  * This URL is the primary mechanism for sharing the poll.
+  * After creation, the creator is redirected to a unique URL for the poll (`/poll/:code`).
   * Participants access the poll by navigating directly to this unique URL.
 * **Anonymous Voting:**
   * Voting is anonymous. Participants do not need to create accounts or provide nicknames.
@@ -128,12 +126,7 @@ This document outlines the design and requirements for the Live Poll App, a full
 
 ---
 
-## 9. Future Considerations / Out of Scope (v1.0)
+## 9. Future Considerations
 
-* Allowing participants to join via a short code entered on the homepage.
 * Poll creators setting an expiry time/date for polls.
 * Poll creators manually starting/stopping polls.
-* User accounts for poll creators to manage their polls.
-* Displaying voter identities (e.g., nicknames or user accounts) alongside votes (explicitly decided against for v1.0 due to complexity and privacy).
-
----
