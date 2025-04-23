@@ -2,17 +2,17 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import CreatePollForm from '@/components/CreatePollForm';
 
 function StartPollCard() {
-    return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle>Start a Live Poll</CardTitle>
-                <CardDescription>Enter your question and options below.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <CreatePollForm />
-            </CardContent>
-        </Card>
-    );
+        return (
+                <Card className="w-full">
+                        <CardHeader>
+                                <CardTitle className="text-xl">Start a Live Poll</CardTitle>
+                                <CardDescription>Enter your question and options below.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                                <CreatePollForm />
+                        </CardContent>
+                </Card>
+        );
 }
 
 export default StartPollCard;

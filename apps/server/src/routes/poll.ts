@@ -91,6 +91,9 @@ router.post('/polls', async (req: any, res: any) => {
 });
 
 router.post('/polls/fetch', async (req: any, res: any) => {
+        // POST /api/polls/fetch - Fetch a poll by id or shortCode
+
+        console.debug('POST /api/polls/fetch', req.body);
 
         const { id, shortCode } = req.body;
 
