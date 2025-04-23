@@ -1,6 +1,7 @@
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { Github, Sun, Moon } from "lucide-react";
+import { Sun, Moon } from "lucide-react";
+import { FaGithub as Github } from "react-icons/fa";
 import { useTheme } from "next-themes";
 
 const menuLinks = [
