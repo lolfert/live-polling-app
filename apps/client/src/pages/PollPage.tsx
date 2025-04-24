@@ -198,6 +198,9 @@ function PollPage() {
                                         </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
+                                        <div className="text-center text-sm text-muted-foreground mb-4">
+                                                Poll Code: <span className="font-semibold text-primary">{poll.shortCode}</span>
+                                        </div>
                                         {poll.options.sort((a, b) => a.text.localeCompare(b.text)).map((option) => (
                                                 <Button
                                                         key={option.id}

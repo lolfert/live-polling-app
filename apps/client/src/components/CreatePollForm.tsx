@@ -82,7 +82,7 @@ function CreatePollForm() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/polls`, {
+      const response = await fetch(`${API_BASE_URL}/polls/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: question.trim(), options: validOptions }),

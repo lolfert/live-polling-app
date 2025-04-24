@@ -1,6 +1,6 @@
-import express from 'express';
 import { io } from '../index';
 import { PrismaClient } from '@prisma/client';
+import * as express from "express";
 
 const prisma = new PrismaClient();
 
@@ -53,18 +53,20 @@ async function broadcastPollUpdates(pollId: string) {
 
 // --- API Route Handlers ---
 
-router.post('/polls', async (req: any, res: any) => {
-        // POST /api/polls - Create a new poll
-        console.debug('POST /api/polls', req.body);
+router.post('/polls/create', async (req: express.Request, res: express.Response): Promise<void> => {
+
+        console.debug('POST /api/polls/create', req.body);
 
         const { question, options } = req.body as CreatePollRequestBody;
 
         // Validation
         if (!question || typeof question !== 'string' || question.trim() === '') {
-                return res.status(400).json({ message: 'Question must be a non-empty string.' });
+                res.status(400).json({ message: 'Question must be a non-empty string.' });
+                return
         }
         if (!options || !Array.isArray(options) || options.length < 2 || options.some(opt => typeof opt !== 'string' || opt.trim() === '')) {
-                return res.status(400).json({ message: 'At least two valid, non-empty options are required.' });
+                res.status(400).json({ message: 'At least two valid, non-empty options are required.' });
+                return
         }
 
         try {
@@ -90,15 +92,16 @@ router.post('/polls', async (req: any, res: any) => {
 
 });
 
-router.post('/polls/fetch', async (req: any, res: any) => {
-        // POST /api/polls/fetch - Fetch a poll by id or shortCode
+
+router.post('/polls/fetch', async (req: express.Request, res: express.Response): Promise<void> => {
 
         console.debug('POST /api/polls/fetch', req.body);
 
         const { id, shortCode } = req.body;
 
         if (!id && !shortCode) {
-                return res.status(400).json({ message: 'Either id or shortCode must be provided.' });
+                res.status(400).json({ message: 'Either id or shortCode must be provided.' });
+                return
         }
 
         try {
@@ -113,7 +116,8 @@ router.post('/polls/fetch', async (req: any, res: any) => {
                 });
 
                 if (!poll) {
-                        return res.status(404).json({ message: 'Poll not found.' });
+                        res.status(404).json({ message: 'Poll not found.' });
+                        return
                 }
 
                 const optionsWithCounts = await getOptionsWithCounts(poll.id);
@@ -126,6 +130,7 @@ router.post('/polls/fetch', async (req: any, res: any) => {
                 };
 
                 res.status(200).json(responseData);
+
         } catch (error) {
                 console.error('Failed to fetch poll:', error);
                 res.status(500).json({ message: 'Internal Server Error: Could not fetch poll data.' });
@@ -134,19 +139,21 @@ router.post('/polls/fetch', async (req: any, res: any) => {
         }
 });
 
-router.post('/vote', async (req: any, res: any) => {
-        // POST /api/vote - Submit or change a vote (anonymous)
 
-        console.log('POST /api/vote', req.body);
+router.post('/vote', async (req: express.Request, res: express.Response): Promise<void> => {
+
+        console.debug('POST /api/vote', req.body);
 
         const { optionId, pollId, voterId } = req.body as VoteRequestBody;
 
         // Validation
         if (!optionId || !pollId || !voterId) {
-                return res.status(400).json({ message: 'Missing required fields: optionId, pollId, voterIdentifier.' });
+                res.status(400).json({ message: 'Missing required fields: optionId, pollId, voterIdentifier.' });
+                return
         }
         if (typeof optionId !== 'string' || typeof pollId !== 'string' || typeof voterId !== 'string') {
-                return res.status(400).json({ message: 'Invalid data types provided.' });
+                res.status(400).json({ message: 'Invalid data types provided.' });
+                return
         }
 
         let voteSuccessfullyProcessed = false;
@@ -163,7 +170,8 @@ router.post('/vote', async (req: any, res: any) => {
         catch (error: any) {
                 await prisma.$disconnect(); // Disconnect early on error
                 console.error('Failed to process vote:', error);
-                return res.status(500).json({ message: 'Internal Server Error: Could not process vote.' });
+                res.status(500).json({ message: 'Internal Server Error: Could not process vote.' });
+                return
         }
         finally {
                 await prisma.$disconnect();
