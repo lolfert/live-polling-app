@@ -51,6 +51,11 @@ async function broadcastPollUpdates(pollId: string) {
 
 }
 
+function handleError(res: express.Response, error: unknown, message: string, statusCode: number = 500) {
+        console.error(message, error);
+        res.status(statusCode).json({ message });
+}
+
 // --- API Route Handlers ---
 
 router.post('/polls/create', async (req: express.Request, res: express.Response): Promise<void> => {
@@ -82,8 +87,7 @@ router.post('/polls/create', async (req: express.Request, res: express.Response)
         }
 
         catch (error) {
-                console.error('Failed to create poll:', error);
-                res.status(500).json({ message: 'Internal Server Error: Could not create poll.' });
+                handleError(res, error, 'Failed to create poll.');
         }
 
         finally {
@@ -132,8 +136,7 @@ router.post('/polls/fetch', async (req: express.Request, res: express.Response):
                 res.status(200).json(responseData);
 
         } catch (error) {
-                console.error('Failed to fetch poll:', error);
-                res.status(500).json({ message: 'Internal Server Error: Could not fetch poll data.' });
+                handleError(res, error, 'Failed to fetch poll.');
         } finally {
                 await prisma.$disconnect();
         }
@@ -168,9 +171,7 @@ router.post('/vote', async (req: express.Request, res: express.Response): Promis
                 res.status(200).json({ message: 'Vote processed successfully.' });
         }
         catch (error: any) {
-                await prisma.$disconnect(); // Disconnect early on error
-                console.error('Failed to process vote:', error);
-                res.status(500).json({ message: 'Internal Server Error: Could not process vote.' });
+                handleError(res, error, 'Failed to process vote.');
                 return
         }
         finally {
