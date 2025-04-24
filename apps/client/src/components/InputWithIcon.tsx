@@ -1,22 +1,30 @@
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
-import { Input } from './ui/input';
+import { Input } from '@/components/ui/input';
 
-const InputWithIcon = React.forwardRef(
+interface InputWithIconProps
+        extends React.InputHTMLAttributes<HTMLInputElement> {
+        startIcon?: React.ReactElement;
+        endIcon?: React.ReactElement;
+}
 
-        ({ className, type, startIcon, endIcon, ...props }: any, ref) => {
+const InputWithIcon = React.forwardRef<HTMLInputElement, InputWithIconProps>(
 
-                const StartIcon = startIcon;
-                const EndIcon = endIcon;
+        (props, ref) => {
+
+                const { type, className, startIcon, endIcon } = props;
+
+                const startIconProps = startIcon?.props || {};
+                const endIconProps = endIcon?.props || {};
 
                 return (
                         <div className="w-full relative">
-                                {StartIcon && (
+                                {startIcon && (
                                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                                                <StartIcon.type
+                                                <startIcon.type
                                                         className={cn('h-8 w-8')}
-                                                        {...startIcon.props}
+                                                        {...startIconProps}
                                                 />
                                         </div>
                                 )}
@@ -30,11 +38,11 @@ const InputWithIcon = React.forwardRef(
                                         ref={ref}
                                         {...props}
                                 />
-                                {EndIcon && (
+                                {endIcon && (
                                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                                                <EndIcon.type
+                                                <endIcon.type
                                                         className={cn('h-8 w-8')}
-                                                        {...endIcon.props}
+                                                        {...endIconProps}
                                                 />
                                         </div>
                                 )}

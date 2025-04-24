@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from "sonner";
-import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { v4 as uuidv4 } from 'uuid';
@@ -55,16 +55,18 @@ function CreatePollForm() {
     }
   };
 
-  const handleDragEnd = (event) => {
+  const handleDragEnd = (event: DragEndEvent) => {
+
     const { active, over } = event;
 
-    if (active.id !== over.id) {
+    if (over && active.id !== over.id) {
       setOptions((prevOptions) => {
         const oldIndex = prevOptions.findIndex(option => option.key === active.id);
         const newIndex = prevOptions.findIndex(option => option.key === over.id);
         return arrayMove(prevOptions, oldIndex, newIndex);
       });
     }
+
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -160,7 +162,17 @@ function CreatePollForm() {
   );
 }
 
-function SortableItem({ id, index, option, onChange, onRemove, isRemovable, isLoading }: any) {
+interface SortableItemProps {
+  id: string;
+  index: number;
+  option: string;
+  onChange: (index: number, value: string) => void;
+  onRemove: () => void;
+  isRemovable: boolean;
+  isLoading: boolean;
+}
+
+function SortableItem({ id, index, option, onChange, onRemove, isRemovable, isLoading }: SortableItemProps) {
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
@@ -176,7 +188,7 @@ function SortableItem({ id, index, option, onChange, onRemove, isRemovable, isLo
       <InputWithIcon
         type="text"
         value={option}
-        onChange={(e: any) => onChange(index, e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(index, e.target.value)}
         placeholder={`Option ${index + 1}`}
         required
         disabled={isLoading}
