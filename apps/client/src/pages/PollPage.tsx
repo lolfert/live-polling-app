@@ -20,10 +20,6 @@ interface PollData {
         options: Option[];
         voterCount: number;
 }
-
-const API_URL = import.meta.env.API_URL || 'http://localhost:8000/api';
-const WEBSOCKET_URL = import.meta.env.WEBSOCKET_URL || 'http://localhost:8000';
-
 const VOTER_ID_KEY = 'pollAppVoterId';
 
 function PollPage() {
@@ -56,7 +52,7 @@ function PollPage() {
 
                 setIsLoading(true);
 
-                fetch(`${API_URL}/polls/fetch`, {
+                fetch(`/api/polls/fetch`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ shortCode }),
@@ -89,14 +85,12 @@ function PollPage() {
 
                 console.debug('Setting up WebSocket connection...');
 
-                const socket = io(WEBSOCKET_URL, {
+                const socket = io(import.meta.env.VITE_BACKEND_URL, {
                         reconnectionAttempts: 5,
                         reconnectionDelay: 2500
                 });
 
                 socketRef.current = socket;
-
-                // if (!ignore) {
 
                 socket.on('connect', () => {
                         console.debug('Socket connected:', socket.id);
@@ -152,7 +146,7 @@ function PollPage() {
 
                 try {
 
-                        const response = await fetch(`${API_URL}/vote`, {
+                        const response = await fetch(`/api/vote`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({

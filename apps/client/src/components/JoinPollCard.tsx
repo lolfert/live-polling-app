@@ -7,11 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { toast } from "sonner";
 
-const API_URL = import.meta.env.API_URL || 'http://localhost:8000/api';
-
 function JoinPollCard() {
-
-        console.log('API URL', API_URL)
 
         const navigate = useNavigate();
 
@@ -24,7 +20,7 @@ function JoinPollCard() {
                         try {
 
                                 console.log('Fetching poll with shortCode:', shortCode);
-                                const response = await fetch(`${API_URL}/polls/fetch`, {
+                                const response = await fetch(`/api/polls/fetch`, {
                                         method: 'POST',
                                         headers: {
                                                 'Content-Type': 'application/json',

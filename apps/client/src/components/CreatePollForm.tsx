@@ -12,8 +12,6 @@ import { InputWithIcon } from './InputWithIcon';
 import { AlignJustify, X } from "lucide-react"
 import { cn } from '@/lib/utils';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-
 const optionParams = {
   minCount: 2,
   maxCount: 8,
@@ -84,7 +82,7 @@ function CreatePollForm() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/polls/create`, {
+      const response = await fetch(`/api/polls/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: question.trim(), options: validOptions }),
