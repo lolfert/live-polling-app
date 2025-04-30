@@ -85,7 +85,8 @@ function PollPage() {
 
                 console.debug('Setting up WebSocket connection...');
 
-                const socket = io(import.meta.env.VITE_BACKEND_URL, {
+                const socket = io({
+                        path: '/socket.io',
                         reconnectionAttempts: 5,
                         reconnectionDelay: 2500
                 });

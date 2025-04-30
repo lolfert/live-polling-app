@@ -8,7 +8,7 @@ import { handleSocketConnection } from './sockets';
 
 dotenv.config({ path: '../../.env' });
 
-// HTTP Setup
+// --- HTTP Setup ---
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -24,11 +24,11 @@ app.get('/api/health', (req, res) => {
         res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Socket Setup
+// --- Socket Setup ---
 
 const io = new SocketIOServer(server, {
         cors: {
-                origin: 'http://localhost:3000',
+                origin: process.env.CLIENT_URL || 'http://localhost:3000',
                 methods: ['GET', 'POST'],
                 credentials: true
         }

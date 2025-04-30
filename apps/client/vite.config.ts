@@ -38,6 +38,11 @@ export default defineConfig(({ mode }) => {
                                         changeOrigin: true,
                                         rewrite: (path) => path.replace(/^\/api/, ''),
                                 },
+                                '/socket.io': {
+                                        target: process.env.VITE_BACKEND_URL,
+                                        ws: true,
+                                        changeOrigin: true,
+                                }
                         },
                 },
         };
