@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter }
 import PollResults from '@/components/PollResults';
 import { Clipboard } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Spinner } from '@/components/ui/spinner';
 
 interface Option {
         id: string;
@@ -244,10 +245,19 @@ function PollPage() {
                 }
         };
 
-        // Render Logic
-        if (isLoading) return <p className="text-center pt-10">Loading poll...</p>;
-        if (error && !poll) return <p className="text-red-600 text-center pt-10">Error: {error}</p>; // Show only error if no data at all
-        if (!poll) return <p className="text-center pt-10">Poll not found.</p>;
+        if (isLoading || error || !poll) {
+                return (
+                        <div className="flex items-center justify-center h-[calc(100vh-64px)]">
+                                {isLoading ? (
+                                        <Spinner size="medium" />
+                                ) : error ? (
+                                        <p className="text-red-600 text-center">Error: {error}</p>
+                                ) : (
+                                        <p className="text-center">Poll not found.</p>
+                                )}
+                        </div>
+                );
+        }
 
         return (
                 <div className="space-y-4">
