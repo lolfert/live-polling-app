@@ -75,7 +75,7 @@ router.post('/polls/create', async (req: express.Request, res: express.Response)
                 return
         }
 
-        // Set default end time (1 minute from now) or validate provided end time
+        // Set default end/expiry time or validate provided end time
         let parsedEndTime: Date;
         if (endTime) {
                 parsedEndTime = new Date(endTime);
@@ -90,9 +90,9 @@ router.post('/polls/create', async (req: express.Request, res: express.Response)
                         return;
                 }
         } else {
-                // Default: Set end time to 1 minute from now
+                // Default: Set end time to 5 minute from now
                 parsedEndTime = new Date();
-                parsedEndTime.setMinutes(parsedEndTime.getMinutes() + 1);
+                parsedEndTime.setMinutes(parsedEndTime.getMinutes() + 5);
         }
 
         try {
