@@ -12,6 +12,7 @@ model Poll {
   question  String
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
+  endTime   DateTime?
   shortCode String    @default(dbgenerated("generate_alphanumeric_id(6)"))
   options   Option[]
   votes     Vote[]

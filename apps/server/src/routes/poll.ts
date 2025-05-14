@@ -9,6 +9,7 @@ const router = express.Router();
 interface CreatePollRequestBody {
         question: string;
         options: string[];
+        endTime?: string;
 }
 
 interface VoteRequestBody {
@@ -62,7 +63,7 @@ router.post('/polls/create', async (req: express.Request, res: express.Response)
 
         console.debug('POST /api/polls/create', req.body);
 
-        const { question, options } = req.body as CreatePollRequestBody;
+        const { question, options, endTime } = req.body as CreatePollRequestBody;
 
         // Validation
         if (!question || typeof question !== 'string' || question.trim() === '') {
@@ -74,10 +75,31 @@ router.post('/polls/create', async (req: express.Request, res: express.Response)
                 return
         }
 
+        // Set default end time (1 minute from now) or validate provided end time
+        let parsedEndTime: Date;
+        if (endTime) {
+                parsedEndTime = new Date(endTime);
+                if (isNaN(parsedEndTime.getTime())) {
+                        res.status(400).json({ message: 'Invalid date format for endTime. Please use ISO format.' });
+                        return;
+                }
+
+                // Ensure endTime is in the future
+                if (parsedEndTime < new Date()) {
+                        res.status(400).json({ message: 'Poll end time must be in the future.' });
+                        return;
+                }
+        } else {
+                // Default: Set end time to 1 minute from now
+                parsedEndTime = new Date();
+                parsedEndTime.setMinutes(parsedEndTime.getMinutes() + 1);
+        }
+
         try {
                 const createdPoll = await prisma.poll.create({
                         data: {
                                 question: question.trim(),
+                                endTime: parsedEndTime,
                                 options: {
                                         create: options.map((option) => ({ text: option.trim() })),
                                 },
@@ -159,9 +181,25 @@ router.post('/vote', async (req: express.Request, res: express.Response): Promis
                 return
         }
 
-        let voteSuccessfullyProcessed = false;
-
         try {
+                // Check if the poll exists and hasn't ended
+                const poll = await prisma.poll.findUnique({
+                        where: { id: pollId }
+                });
+
+                if (!poll) {
+                        res.status(404).json({ message: 'Poll not found.' });
+                        return;
+                }
+
+                // Check if the poll has ended
+                if (poll.endTime && new Date(poll.endTime) < new Date()) {
+                        res.status(403).json({ message: 'This poll has ended and is no longer accepting votes.' });
+                        return;
+                }
+
+                let voteSuccessfullyProcessed = false;
+
                 await prisma.vote.upsert({
                         where: { pollId_voterId: { pollId, voterId } },
                         update: { optionId },
@@ -169,6 +207,12 @@ router.post('/vote', async (req: express.Request, res: express.Response): Promis
                 });
                 voteSuccessfullyProcessed = true;
                 res.status(200).json({ message: 'Vote processed successfully.' });
+
+                if (voteSuccessfullyProcessed) {
+                        broadcastPollUpdates(pollId).catch(err => {
+                                console.error(`Error during background broadcast trigger for poll ${pollId}:`, err);
+                        });
+                }
         }
         catch (error: any) {
                 handleError(res, error, 'Failed to process vote.');
@@ -177,13 +221,6 @@ router.post('/vote', async (req: express.Request, res: express.Response): Promis
         finally {
                 await prisma.$disconnect();
         }
-
-        if (voteSuccessfullyProcessed) {
-                broadcastPollUpdates(pollId).catch(err => {
-                        console.error(`Error during background broadcast trigger for poll ${pollId}:`, err);
-                });
-        }
-
 });
 
 export default router;
