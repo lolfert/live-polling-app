@@ -35,7 +35,6 @@ function PollResults({ options }: PollResultsProps) {
                         ) : (
                                 <p className="text-muted-foreground">No results yet.</p>
                         )}
-                        <p className="text-sm font-semibold text-right pt-2">Total Votes: {totalVotes}</p>
                 </div>
         );
 }

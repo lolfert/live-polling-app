@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import PollResults from '@/components/PollResults';
+import { Clipboard } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface Option {
         id: string;
@@ -19,6 +21,7 @@ interface PollData {
         question: string;
         options: Option[];
         voterCount: number;
+        endTime: string | null;
 }
 const VOTER_ID_KEY = 'pollAppVoterId';
 
@@ -31,6 +34,8 @@ function PollPage() {
         const [poll, setPoll] = useState<PollData | null>(null);
         const [selectedOptionId, setSelectedOptionId] = useState<string | null>(() => getInitialVotedOption(shortCode));
         const [participantCount, setParticipantCount] = useState<number>(0);
+        const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
+        const [isPollActive, setIsPollActive] = useState<boolean>(true);
 
         const [isVoting, setIsVoting] = useState(false);
         const [isLoading, setIsLoading] = useState(true);
@@ -133,6 +138,54 @@ function PollPage() {
 
         }, [pollId]);
 
+        // Poll Status and Time Remaining Effect
+        useEffect(() => {
+                if (!poll || !poll.endTime) return;
+
+                const checkPollStatus = () => {
+                        const now = new Date();
+                        const endTime = new Date(poll.endTime as string);
+
+                        // Check if poll has ended
+                        if (now >= endTime) {
+                                setIsPollActive(false);
+                                setTimeRemaining(null);
+                                return;
+                        }
+
+                        // Calculate remaining time
+                        const remainingMs = endTime.getTime() - now.getTime();
+                        const remainingSeconds = Math.floor(remainingMs / 1000);
+
+                        if (remainingSeconds <= 0) {
+                                setIsPollActive(false);
+                                setTimeRemaining(null);
+                                return;
+                        }
+
+                        // Format time remaining
+                        const minutes = Math.floor(remainingSeconds / 60);
+                        const seconds = remainingSeconds % 60;
+
+                        if (minutes > 0) {
+                                setTimeRemaining(`${minutes}m ${seconds}s`);
+                        } else {
+                                setTimeRemaining(`${seconds}s`);
+                        }
+
+                        setIsPollActive(true);
+                };
+
+                // Check immediately
+                checkPollStatus();
+
+                // Set interval to update every second
+                const intervalId = setInterval(checkPollStatus, 1000);
+
+                // Clean up interval on unmount
+                return () => clearInterval(intervalId);
+        }, [poll]);
+
         // Handle Voting Callback
         const handleVote = useCallback(async (optionId: string) => {
 
@@ -178,49 +231,88 @@ function PollPage() {
 
         }, [poll, isVoting]);
 
+        const handleCopyToClipboard = () => {
+                if (poll?.shortCode) {
+                        navigator.clipboard.writeText(poll.shortCode)
+                                .then(() => {
+                                        toast.success("Copied to clipboard!");
+                                })
+                                .catch((err) => {
+                                        console.error("Could not copy text: ", err);
+                                        toast.error("Copy Error", { description: "Could not copy to clipboard. Please try again." });
+                                });
+                }
+        };
+
         // Render Logic
         if (isLoading) return <p className="text-center pt-10">Loading poll...</p>;
         if (error && !poll) return <p className="text-red-600 text-center pt-10">Error: {error}</p>; // Show only error if no data at all
         if (!poll) return <p className="text-center pt-10">Poll not found.</p>;
 
         return (
-                <div className="space-y-6">
+                <div className="space-y-4">
+
+                        {poll.endTime && (
+                                <div className="text-sm flex justify-between items-center">
+                                        <Badge variant={isPollActive ? "default" : "destructive"} className={`text-sm px-3 py-1 rounded-md inline-block ${isPollActive ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'}`}>
+                                                {isPollActive ? (
+                                                        <>Poll Open • Closes in {timeRemaining}</>
+                                                ) : (
+                                                        <>Poll closed</>
+                                                )}
+                                        </Badge>
+                                        <div className="flex items-center space-x-2">
+                                                <span className="text-sm">Join Code: <span className="font-semibold text-primary">{poll.shortCode}</span></span>
+                                                <Button variant="outline" size="icon" onClick={handleCopyToClipboard} className="text-sm w-7 h-7 p-1">
+                                                        <Clipboard className="w-2 h-2" />
+                                                </Button>
+                                        </div>
+                                </div>
+                        )}
+
                         <Card>
                                 <CardHeader>
                                         <CardTitle className="text-xl md:text-2xl">{poll.question}</CardTitle>
                                         <CardDescription>
-                                                Select an option below to cast your vote. Results update live.
+                                                {isPollActive ? (
+                                                        <>Select an option below to cast your vote. Results update live.</>
+                                                ) : (
+                                                        <>This poll has ended. No more votes can be submitted.</>
+                                                )}
                                         </CardDescription>
                                 </CardHeader>
-                                <CardContent className="space-y-3">
-                                        <div className="text-center text-sm text-muted-foreground mb-4">
-                                                Poll Code: <span className="font-semibold text-primary">{poll.shortCode}</span>
-                                        </div>
+                        </Card>
+
+                        <Card>
+                                <CardHeader>
+                                        <CardTitle>Options</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 pt-6">
                                         {poll.options.sort((a, b) => a.text.localeCompare(b.text)).map((option) => (
                                                 <Button
                                                         key={option.id}
                                                         variant={selectedOptionId === option.id ? "default" : "outline"}
                                                         className="w-full justify-start text-left h-auto py-3"
                                                         onClick={() => handleVote(option.id)}
-                                                        disabled={isVoting}
+                                                        disabled={isVoting || !isPollActive}
                                                 >
                                                         {option.text}
                                                 </Button>
                                         ))}
                                 </CardContent>
-                                <CardFooter className="text-sm text-muted-foreground flex justify-between">
-                                        <span>Live participants: {participantCount}</span>
-                                        <span>Total voters: {poll.voterCount}</span>
-                                </CardFooter>
                         </Card>
 
                         <Card>
                                 <CardHeader>
-                                        <CardTitle>Live Results</CardTitle>
+                                        <CardTitle>Results</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                         <PollResults options={poll.options} />
                                 </CardContent>
+                                <CardFooter className="text-sm font-semibold flex justify-between">
+                                        <span>People Here Now: {participantCount}</span>
+                                        <span>Total Votes: {poll.voterCount}</span>
+                                </CardFooter>
                         </Card>
 
                         <Button variant="secondary" onClick={() => navigate('/')}>
