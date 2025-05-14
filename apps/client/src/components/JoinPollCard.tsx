@@ -38,6 +38,7 @@ function JoinPollCard() {
                         }
                         catch (error) {
                                 toast.error('No poll found with this code.');
+                                console.error('Error fetching poll:', error);
                         }
                         finally {
                                 setIsLoading(false);
