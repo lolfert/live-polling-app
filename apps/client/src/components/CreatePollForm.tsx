@@ -119,7 +119,7 @@ function CreatePollForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
+      <div className="space-y-4">
         <Label htmlFor="question">Question</Label>
         <Input
           id="question"
@@ -130,24 +130,25 @@ function CreatePollForm() {
           disabled={isLoading}
         />
       </div>
-
-      <Label>Options</Label>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={options.map(option => option.key)}>
-          {options.map((option, index) => (
-            <SortableItem
-              key={option.key}
-              id={option.key}
-              index={index}
-              option={option.value}
-              onChange={handleOptionChange}
-              onRemove={() => removeOption(index)}
-              isRemovable={options.length > optionParams.minCount}
-              isLoading={isLoading}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+      <div className="space-y-4">
+        <Label>Options</Label>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={options.map(option => option.key)}>
+            {options.map((option, index) => (
+              <SortableItem
+                key={option.key}
+                id={option.key}
+                index={index}
+                option={option.value}
+                onChange={handleOptionChange}
+                onRemove={() => removeOption(index)}
+                isRemovable={options.length > optionParams.minCount}
+                isLoading={isLoading}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
 
       <Button type="button" className="w-full" variant="secondary" onClick={addOption} disabled={isLoading || options.length >= optionParams.maxCount}>
         Add Option
