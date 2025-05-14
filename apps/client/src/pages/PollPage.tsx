@@ -302,7 +302,7 @@ function PollPage() {
                                                 <Button
                                                         key={option.id}
                                                         variant={selectedOptionId === option.id ? "default" : "outline"}
-                                                        className="w-full justify-start text-left h-auto py-3"
+                                                        className="w-full dark:text-white justify-start text-left h-auto py-3"
                                                         onClick={() => handleVote(option.id)}
                                                         disabled={isVoting || !isPollActive}
                                                 >
