@@ -4,6 +4,10 @@ A full-stack web application for creating and participating in real-time interac
 
 ![Live Polling App](https://img.shields.io/badge/status-ready-brightgreen)
 
+![Home Page](screenshots/home-page.png)
+
+![Results Page](screenshots/results-page.png)
+
 ## 📋 Summary
 
 The Live Polling App is a responsive, real-time application designed for creating and participating in multiple-choice polls. Ideal for presentations, classrooms, or team meetings, it enables presenters to get immediate, visualized feedback from their audience without requiring participants to create accounts or download additional software.
